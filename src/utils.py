@@ -1,12 +1,13 @@
 from transformers import AdamW, AutoModelForSeq2SeqLM, AutoTokenizer, get_linear_schedule_with_warmup
 from torch.utils.data import DataLoader, Dataset, RandomSampler, SequentialSampler
-from peft import get_peft_model, LoraConfig, TaskType, PeftModel
 import json
 import torch
 from tqdm import tqdm
 import math
 import functools
 from time import time
+import gdown
+import os
 
 
 class ELI5DatasetS2S(Dataset):
@@ -29,6 +30,69 @@ class ELI5DatasetS2S(Dataset):
 
     def __getitem__(self, idx):
         return (self.data[idx][0], self.data[idx][1])
+    
+
+class ArgumentsS2S():
+    """Class for records model training arguments.
+    """
+    def __init__(self,
+                batch_size = 8,
+                backward_freq = 16,
+                max_length = 1024,
+                print_freq = 5,
+                model_save_name = "models/eli5_bart_model",
+                learning_rate = 2e-4,
+                num_epochs = 3,
+                device = 'cuda:0',
+                save_freq = 5000,
+                continue_training = {"continue": False,
+                                    "epoch": 0,
+                                    "step": 15000},
+                save_logs_path = 'logs.json'):
+        
+        self.batch_size = batch_size
+        self.backward_freq = backward_freq
+        self.max_length = max_length
+        self.print_freq = print_freq
+        self.model_save_name = model_save_name
+        self.learning_rate = learning_rate
+        self.num_epochs = num_epochs
+        self.device = device
+        self.save_freq = save_freq
+        self.continue_training = continue_training
+        self.save_logs_path = save_logs_path
+
+
+def check_dataset_folder():
+    """Check if datasets exists, if not, download it."""
+    data_path = "data"
+    if not ('ELI5.jsonl' in os.listdir(data_path)):
+        print("Download ELI5.jsonl from GDrive...")
+        url = 'https://drive.google.com/uc?id=19Mb4ZoUzt_6Aa6is4D4_8Y_25eF8Xsba'
+        output = data_path + "\ELI5.jsonl"
+        gdown.download(url, output, quiet=False)
+    if not ('ELI5_val.jsonl' in os.listdir(data_path)):
+        print("Download ELI5_val.jsonl from GDrive...")
+        url = 'https://drive.google.com/uc?id=13XsUN3gp5N2FbQ4rCmBFSdoieNyebyYm'
+        output = data_path + "\ELI5_val.jsonl"
+        gdown.download(url, output, quiet=False)
+        
+
+
+def save_logs(path, logs):
+    """Saving training logs into json file
+
+    Args:
+        path (string): path to save logs
+        logs (dict): dictionary of train and eval loss
+    """
+    try:
+        f = open(path, 'x')
+    except:
+        pass
+
+    with open(path, 'a') as f:
+        json.dump(logs, f)
 
 
 def make_qa_s2s_batch(qa_list, tokenizer, max_len=64, max_a_len=360, device="cuda:0"):
