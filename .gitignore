@@ -160,3 +160,7 @@ cython_debug/
 #.idea/
 
 pgdata
+data/ELI5_val.jsonl
+data/ELI5.jsonl
+
+notebooks/models
