@@ -1,5 +1,10 @@
 # Gradients-Labs
 
-This is the repo of team 2 for Question 1 and 2 of the lab.
+This is the repo of team 2 for Question 1cof the lab.
 
-Question 2 postgres database data: [pgdata link](https://drive.google.com/file/d/17o-lXn0VWi6W7K9XUuG7qfqssfKlBq5F/view?usp=sharing)
+In this lab, we train two models: flan-t5 and bart.
+
+How to run:
+1. Clone this repo
+2. Run 'python setup.py install'
+3. Enjoy

@@ -1,0 +1,8 @@
+gdown
+nltk
+peft
+rouge
+spacy
+torch
+tqdm
+transformers
